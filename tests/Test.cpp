@@ -3,6 +3,8 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <queue>
+#include <iostream>
+#include <vector>
 
 #include "Generator.hpp"
 #include "IdealCache.hpp"
@@ -16,7 +18,6 @@ int main(int argc, char **argv)
 
     return RUN_ALL_TESTS();
 }
-
 
 static int beladyMIN(const std::vector<int>& queries, int cacheCapacity) {
     int N = queries.size();
@@ -66,11 +67,20 @@ static int beladyMIN(const std::vector<int>& queries, int cacheCapacity) {
     return hits;
 }
 
+std::ostream &operator<< (std::ostream& stream, const std::vector<int>& vec) {
+    for (auto to : vec) {
+        stream << to << " ";
+    }
+    return stream;
+}
+
 TEST(Auto, IdealCacheComprasion) {
     const size_t QUERIES_COUNT = 1000; 
     const size_t CACHE_CAPACITY = 100;
 
     std::vector<int> queries = test::randomIntVector(QUERIES_COUNT, -100, 100);
+    std::cout << "queries : " << queries << "\n";
+
     int beladyHits= beladyMIN(queries, CACHE_CAPACITY);
 
 

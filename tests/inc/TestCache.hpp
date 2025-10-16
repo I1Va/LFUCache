@@ -13,7 +13,7 @@ namespace test
     };
 
     inline Page slowGetPage(int key) {
-        return Page(randomInt(INT_MIN, INT_MAX)); 
+        return Page(randomInt(RAND_INT_MIN, RAND_INT_MAX)); 
     }
 }
 
