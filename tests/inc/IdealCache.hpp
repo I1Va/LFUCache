@@ -98,8 +98,6 @@ public:
         currentQueryIteration_++;
         updateQueryTable(key, currentQueryIteration_);
 
-        std::cout << "lookupUpdate : " << key << "\n";
-
         auto hit = hashTable_.find(key);
     
         if (hit == hashTable_.end()) {
