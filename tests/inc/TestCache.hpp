@@ -13,7 +13,7 @@ namespace test
     };
 
     inline Page slowGetPage(int key) {
-        return Page(gen::randomInt(INT_MIN, INT_MAX)); 
+        return Page(randomInt(INT_MIN, INT_MAX)); 
     }
 }
 

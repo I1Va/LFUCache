@@ -4,7 +4,7 @@
 #include <list>
 #include <unordered_map>
 
-namespace Cache
+namespace cache
 {
 
 template <typename T, typename KeyT = int>
@@ -22,10 +22,10 @@ private:
         return;
     }
 
-    ListIt getSubstitutionPos() {
-        assert(cache_.size());
+    KeyT getSubstitutionKey() {
+        assert(hashTable_.size());
 
-        return cache_.begin();
+        return hashTable_.begin()->first;
     }
 
 public:
@@ -39,9 +39,13 @@ public:
             cache_.push_front(slowGetPage(key));
             hashTable_[key] = cache_.begin();
         } else {
-            ListIt pos = getSubstitutionPos();
-            *pos = slowGetPage(key); 
-            hashTable_[key] = pos;
+                KeyT subKey = getSubstitutionKey();
+                ListIt subPos = hashTable_[subKey];
+            
+                *subPos = slowGetPage(key); 
+                hashTable_.erase(subKey);
+
+                hashTable_[key] = subPos;
         }
         return false;          
     }
