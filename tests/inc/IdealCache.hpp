@@ -22,7 +22,7 @@ class IdealCache {
     using ListIt = typename std::list<T>::iterator;
 
     QueryIteration currentQueryIteration_ = -1;
-    size_t size_ = 0;
+    size_t capacity_ = 0;
     std::list<T> cache_;
     std::unordered_map<KeyT, ListIt> hashTable_;
 
@@ -31,22 +31,24 @@ class IdealCache {
 
 private:
     bool valid() const {
-        return cache_.size() <= size_ && hashTable_.size() <= size_;
+        return cache_.size() <= capacity_ && hashTable_.size() <= capacity_;
     }
 
-    bool full() const { return (cache_.size() == size_); }
+    bool full() const { return (cache_.size() == capacity_); }
     
     void updateQueryTable(const KeyT key, const QueryIteration currentQueryIteration) {
         auto it = queryTable_.find(key);
         assert(it != queryTable_.end());
         
         std::queue<QueryIteration> &queryTableQueue = it->second;
+    
+        assert(!queryTableQueue.empty());
         queryTableQueue.pop();      
     }   
 
     QueryIteration getActualKeyNextQueryIteration(const KeyT key) {
         assert(queryTable_.find(key) != queryTable_.end());
-        std::queue<QueryIteration> queryTableQueue = queryTable_.find(key)->second;
+        std::queue<QueryIteration> &queryTableQueue = queryTable_.find(key)->second;
         assert(!queryTableQueue.empty());
        
         return queryTableQueue.front();
@@ -68,13 +70,12 @@ private:
                 return key;
             }
         }
-        assert(0 && "cache queue doesn't contain valid values");
+        assert(0 && "keyQueue_ doesn't contain valid values");
         return 0;
     }
 
 public:
-    IdealCache(const size_t size, const std::vector<KeyT> &queries): size_(size) {
-        
+    IdealCache(const size_t capacity, const std::vector<KeyT> &queries): capacity_(capacity) {
         for (QueryIteration i = 0; i < queries.size(); i++) {
             if (queryTable_.find(queries[i]) == queryTable_.end())
                 queryTable_[queries[i]] = std::queue<QueryIteration>();
@@ -122,7 +123,6 @@ public:
         return true;
     }
 };
-
 
 } // namespace test
 

@@ -9,7 +9,7 @@
 #include "Generator.hpp"
 #include "IdealCache.hpp"
 #include "TestCache.hpp"
-#include "LIRSCache.hpp"
+#include "LFUCache.hpp"
 
 
 int main(int argc, char **argv)
@@ -23,9 +23,9 @@ TEST(Auto, IdealCacheComprasion) {
     const size_t QUERIES_COUNT = 10000; 
     const size_t CACHE_CAPACITY = 1000;
 
-    std::vector<int> queries = test::randomIntVector(QUERIES_COUNT, -100, 100);
+    std::vector<int> queries = test::randomIntVector(QUERIES_COUNT, -1000, 1000);
 
-    cache::Cache<test::Page> cache(CACHE_CAPACITY);
+    // cache::Cache<test::Page> cache(CACHE_CAPACITY);
     test::IdealCache<test::Page> idealCache(CACHE_CAPACITY, queries);
     
     int idealHits = 0;
