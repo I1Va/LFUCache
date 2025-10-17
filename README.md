@@ -11,6 +11,7 @@
 
 ```bash
 git clone https://github.com/I1Va/LFUCache.git
+cd LFUCache
 
 cmake -B build
 cmake --build build
