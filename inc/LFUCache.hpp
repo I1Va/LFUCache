@@ -42,22 +42,22 @@ private:
         FreqT oldFreq = cacheListIt->freq_++;
     
         assert(freqTable_.find(oldFreq) != freqTable_.end());
-
         assert(!freqTable_[oldFreq].empty());
-        if (freqTable_[oldFreq].empty() && oldFreq == minFreq_) minFreq_++;
-
         assert(cacheListIt->freq_ != oldFreq);
+    
         freqTable_[cacheListIt->freq_].splice(freqTable_[cacheListIt->freq_].end(), freqTable_[oldFreq], cacheListIt);
+        if (freqTable_[oldFreq].empty() && oldFreq == minFreq_) minFreq_++;
     }
 
     void removeLFUNode() {
         assert(freqTable_.find(minFreq_) != freqTable_.end());
 
-
         CacheListIt LFUIt = freqTable_[minFreq_].begin();
+    
         hashTable_.erase(LFUIt->key_);
         freqTable_[minFreq_].pop_front();
         size_--;
+    
         if (freqTable_[minFreq_].empty()) minFreq_++;
     }    
 
@@ -66,6 +66,8 @@ public:
 
     template <typename F>
     bool lookupUpdate(KeyT key, F slowGetPage) {
+        if (capacity_ == 0) return true;
+
         assert(hashTable_.size() <= capacity_);
         assert(size_ <= capacity_);
 

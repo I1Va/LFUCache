@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <cassert>
 #include <climits>
 #include <algorithm>
 #include <iostream>
@@ -21,7 +22,6 @@ template <typename T, typename KeyT = int>
 class IdealCache {
     using ListIt = typename std::list<T>::iterator;
 
-    QueryIteration currentQueryIteration_ = -1;
     size_t capacity_ = 0;
     std::list<T> cache_;
     std::unordered_map<KeyT, ListIt> hashTable_;
@@ -36,7 +36,7 @@ private:
 
     bool full() const { return (cache_.size() == capacity_); }
     
-    void updateQueryTable(const KeyT key, const QueryIteration currentQueryIteration) {
+    void updateQueryTable(const KeyT key) {
         auto it = queryTable_.find(key);
         assert(it != queryTable_.end());
         
@@ -87,7 +87,7 @@ public:
             KeyT key = queries[i];
             if (used.find(key) == used.end()) {
                 used.insert(key);
-                queryTable_[queries[i]].push(MAX_QUERY_ITERATION);
+                queryTable_[key].push(MAX_QUERY_ITERATION);
             }
         }
     }
@@ -96,8 +96,7 @@ public:
     bool lookupUpdate(KeyT key, F slowGetPage) {
         assert(valid());
 
-        currentQueryIteration_++;
-        updateQueryTable(key, currentQueryIteration_);
+        updateQueryTable(key);
 
         auto hit = hashTable_.find(key);
     
