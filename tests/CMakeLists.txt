@@ -13,7 +13,11 @@ include_directories(${CMAKE_SOURCE_DIR}/tests/inc)
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 
+
 target_link_libraries (${PROJECT_NAME} PUBLIC
    gtest
    gtest_main
 )
+
+target_compile_options(tests PRIVATE -fsanitize=address -fno-omit-frame-pointer)
+target_link_options(tests PRIVATE -fsanitize=address)

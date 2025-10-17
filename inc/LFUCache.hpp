@@ -2,7 +2,9 @@
 #define LFUCACHE_HPP
 
 #include <list>
+#include <cassert>
 #include <unordered_map>
+
 
 namespace cache
 {
@@ -40,14 +42,12 @@ private:
         FreqT oldFreq = cacheListIt->freq_++;
     
         assert(freqTable_.find(oldFreq) != freqTable_.end());
-        freqTable_[oldFreq].erase(cacheListIt);
 
+        assert(!freqTable_[oldFreq].empty());
         if (freqTable_[oldFreq].empty() && oldFreq == minFreq_) minFreq_++;
 
         assert(cacheListIt->freq_ != oldFreq);
-        freqTable_[cacheListIt->freq_].splice(freqTable_[cacheListIt->freq_].end(),
-                           freqTable_[oldFreq], cacheListIt);
-
+        freqTable_[cacheListIt->freq_].splice(freqTable_[cacheListIt->freq_].end(), freqTable_[oldFreq], cacheListIt);
     }
 
     void removeLFUNode() {
@@ -56,8 +56,8 @@ private:
 
         CacheListIt LFUIt = freqTable_[minFreq_].begin();
         hashTable_.erase(LFUIt->key_);
-        
         freqTable_[minFreq_].pop_front();
+        size_--;
         if (freqTable_[minFreq_].empty()) minFreq_++;
     }    
 
@@ -66,13 +66,17 @@ public:
 
     template <typename F>
     bool lookupUpdate(KeyT key, F slowGetPage) {
+        assert(hashTable_.size() <= capacity_);
+        assert(size_ <= capacity_);
+
         auto hit = hashTable_.find(key);
         if (hit == hashTable_.end()) {
             if (full()) removeLFUNode();
 
             freqTable_[0].push_back({key, slowGetPage(key), 0});
-            // hashTable_[key] = std::prev(freqTable_[0].end()); !!!!
+            hashTable_[key] = std::prev(freqTable_[0].end()); 
             minFreq_ = 0;
+            size_++;
 
             return false;          
         }
@@ -84,6 +88,5 @@ public:
 };
 
 }
-
 
 #endif // LFUCACHE_HPP
