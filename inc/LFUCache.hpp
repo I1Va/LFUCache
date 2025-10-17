@@ -19,7 +19,7 @@ struct LFUCacheNode {
 
 template <typename T>
 class LFUCache {
-    using keyT = typename LFUCacheNode<T>::KeyT;
+    using KeyT = typename LFUCacheNode<T>::KeyT;
     using CacheListIt = typename std::list<LFUCacheNode<T>>::iterator;
     using FreqT = typename LFUCacheNode<T>::FreqT;
     
@@ -44,24 +44,22 @@ private:
 
         if (freqTable_[oldFreq].empty() && oldFreq == minFreq_) minFreq_++;
 
-        freqTable_[cacheListIt->freq_].push_back(cacheListIt);
+        assert(cacheListIt->freq_ != oldFreq);
+        freqTable_[cacheListIt->freq_].splice(freqTable_[cacheListIt->freq_].end(),
+                           freqTable_[oldFreq], cacheListIt);
+
     }
 
     void removeLFUNode() {
         assert(freqTable_.find(minFreq_) != freqTable_.end());
 
-        CacheListIt LFUIt = freqTable_[minFreq_].front();
+
+        CacheListIt LFUIt = freqTable_[minFreq_].begin();
         hashTable_.erase(LFUIt->key_);
         
         freqTable_[minFreq_].pop_front();
         if (freqTable_[minFreq_].empty()) minFreq_++;
-    }
-
-    void addNewCacheNode(const KeyT key, const T &data) {
-        
-    }
-
-    
+    }    
 
 public:
     LFUCache(const size_t capacity): capacity_(capacity) {}
@@ -73,15 +71,13 @@ public:
             if (full()) removeLFUNode();
 
             freqTable_[0].push_back({key, slowGetPage(key), 0});
+            // hashTable_[key] = std::prev(freqTable_[0].end()); !!!!
             minFreq_ = 0;
-
-            
 
             return false;          
         }
 
-        CacheListIt hitPos = hit->second;
-        refreshCachePos(hitPos);
+        refreshKey(key);
 
         return true;
     }
