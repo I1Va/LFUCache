@@ -7,29 +7,9 @@
 #include <vector>
 
 #include "Generator.hpp"
-#include "IdealCache.hpp"
 #include "TestCache.hpp"
-#include "LFUCache.hpp"
+#include "Cache.hpp"
 
-template <typename T>
-struct isCacheType : std::false_type {};
-
-template <typename DataT>
-struct isCacheType<cache::LFUCache<DataT>> : std::true_type {};
-
-template <typename DataT>
-struct isCacheType<test::IdealCache<DataT>> : std::true_type {};
-
-template <typename T>
-concept CacheType = isCacheType<T>::value;
-
-template <CacheType CacheT, typename F>
-int countCacheHits(CacheT &cache, const std::vector<int> &queries, F slowGetPage) {
-    int result = 0;
-    for (int q : queries)
-        result += cache.lookupUpdate(q, slowGetPage);
-    return result;
-}
 
 int main(int argc, char **argv)
 {
@@ -45,7 +25,7 @@ TEST(Auto, IdealCacheComprasion) {
     std::vector<int> queries = test::randomIntVector(QUERIES_COUNT, -1000, 1000);
 
     cache::LFUCache<test::Page> LFUcache(CACHE_CAPACITY);
-    test::IdealCache<test::Page> idealCache(CACHE_CAPACITY, queries);
+    cache::IdealCache<test::Page> idealCache(CACHE_CAPACITY, queries);
     
     int LFUHits = countCacheHits(LFUcache, queries, test::slowGetPage);
     int idealHits = countCacheHits(idealCache, queries, test::slowGetPage);
@@ -105,7 +85,7 @@ TEST(Ideal, BasicHit) {
     const size_t CACHE_CAPACITY = 2;
     // queries passed to constructor so IdealCache knows future accesses
     std::vector<int> queries = {1, 2, 1};
-    test::IdealCache<test::Page> ideal(CACHE_CAPACITY, queries);
+    cache::IdealCache<test::Page> ideal(CACHE_CAPACITY, queries);
 
     int hits = 0;
     for (int q : queries) hits += ideal.lookupUpdate(q, test::slowGetPage);
@@ -117,7 +97,7 @@ TEST(Ideal, SequentialUniqueCapacityOne) {
     const size_t CACHE_CAPACITY = 1;
     // unique sequential accesses -> no hits for capacity 1
     std::vector<int> queries = {1, 2, 3};
-    test::IdealCache<test::Page> ideal(CACHE_CAPACITY, queries);
+    cache::IdealCache<test::Page> ideal(CACHE_CAPACITY, queries);
 
     int hits = 0;
     for (int q : queries) hits += ideal.lookupUpdate(q, test::slowGetPage);
@@ -129,7 +109,7 @@ TEST(Ideal, RepeatedPatternHighHitRate2) {
     const size_t CACHE_CAPACITY = 2;
     // repeated alternation: 1,2,1,2,1,2 -> after warmup should hit frequently
     std::vector<int> queries = {1, 2, 1, 2, 1, 2};
-    test::IdealCache<test::Page> ideal(CACHE_CAPACITY, queries);
+    cache::IdealCache<test::Page> ideal(CACHE_CAPACITY, queries);
 
     int hits = 0;
     for (int q : queries) hits += ideal.lookupUpdate(q, test::slowGetPage);
@@ -147,7 +127,7 @@ TEST(Compare, UniformRandom) {
     std::vector<int> queries = test::randomIntVector(QUERIES_COUNT, -1000, 1000);
 
     cache::LFUCache<test::Page> lfu(CACHE_CAPACITY);
-    test::IdealCache<test::Page> ideal(CACHE_CAPACITY, queries);
+    cache::IdealCache<test::Page> ideal(CACHE_CAPACITY, queries);
 
     int lfu_hits   = countCacheHits(lfu, queries, test::slowGetPage);
     int ideal_hits = countCacheHits(ideal, queries, test::slowGetPage);
@@ -202,7 +182,7 @@ TEST(LFU, RepeatedPattern) {
 TEST(Ideal, BasicHit2) {
     const size_t CACHE_CAPACITY = 2;
     std::vector<int> queries = {1, 2, 1};
-    test::IdealCache<test::Page> ideal(CACHE_CAPACITY, queries);
+    cache::IdealCache<test::Page> ideal(CACHE_CAPACITY, queries);
 
     int hits = countCacheHits(ideal, queries, test::slowGetPage);
     EXPECT_EQ(hits, 1);
@@ -211,7 +191,7 @@ TEST(Ideal, BasicHit2) {
 TEST(Ideal, EvictByBelady1) {
     const size_t CACHE_CAPACITY = 2;
     std::vector<int> queries = {1, 2, 1, 3};
-    test::IdealCache<test::Page> ideal(CACHE_CAPACITY, queries);
+    cache::IdealCache<test::Page> ideal(CACHE_CAPACITY, queries);
 
     int hits = countCacheHits(ideal, queries, test::slowGetPage);
     EXPECT_EQ(hits, 1);
@@ -220,7 +200,7 @@ TEST(Ideal, EvictByBelady1) {
 TEST(Ideal, RepeatedPatternHighHitRate1) {
     const size_t CACHE_CAPACITY = 2;
     std::vector<int> queries = {1,2,1,2,1,2};
-    test::IdealCache<test::Page> ideal(CACHE_CAPACITY, queries);
+    cache::IdealCache<test::Page> ideal(CACHE_CAPACITY, queries);
 
     int hits = countCacheHits(ideal, queries, test::slowGetPage);
     EXPECT_EQ(hits, 4);
@@ -252,7 +232,7 @@ TEST(Compare, SmallCache) {
     std::vector<int> queries = {1,2,3,1,2,3,1,2,3,4,5,6};
 
     cache::LFUCache<test::Page> lfu(CACHE_CAP);
-    test::IdealCache<test::Page> ideal(CACHE_CAP, queries);
+    cache::IdealCache<test::Page> ideal(CACHE_CAP, queries);
 
     int lfu_hits   = countCacheHits(lfu, queries, test::slowGetPage);
     int ideal_hits = countCacheHits(ideal, queries, test::slowGetPage);
@@ -279,7 +259,7 @@ TEST(LFU, EvictHotCold) {
 
 TEST(Ideal, EvictByBelady) {
     std::vector<int> queries = {1,2,1,3};
-    test::IdealCache<test::Page> ideal(2, queries);
+    cache::IdealCache<test::Page> ideal(2, queries);
     int hits = countCacheHits(ideal, queries, test::slowGetPage);
     EXPECT_EQ(hits, 1); // only second 1 is a hit
 }

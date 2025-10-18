@@ -6,12 +6,12 @@
 #include <unordered_set>
 #include <vector>
 #include <cassert>
-#include <climits>
+#include <limits>
 #include <algorithm>
 #include <iostream>
 #include <queue>
 
-namespace test
+namespace cache
 {
 
 using QueryIteration = int;

@@ -1,11 +1,9 @@
 #include <iostream>
+#include <vector>
 
-#include "LFUCache.hpp"
+#include "Cache.hpp"
 
-int slowGetPage(int key) {
-    std::cout << "cache miss!\n";
-    return 0;
-}
+int slowGetPage(int key) { return 0; }
 
 int main() {
     int cacheCapacity = 0;
@@ -14,20 +12,21 @@ int main() {
     std::cout << "Enter queries (Ctrl+D to end): \n";
 
     if (cacheCapacity < 0) {
-        std::cout << "cacheCapacity should be > 0";
+        std::cout << "Cache capacity should be > 0";
         return 1;
     }
 
-    cache::LFUCache<int> LFUCache(cacheCapacity);
-    
+    std::vector<int> queries;
     int q = 0;
-    int hits = 0;
-    int queries = 0;
-    while (std::cin >> q) {
-        queries++;
-        hits += LFUCache.lookupUpdate(q, slowGetPage);
-    }
+    while (std::cin >> q) queries.push_back(q);
 
-    std::cout << "Count of queries    : " << queries << "\n";
-    std::cout << "Count of cache hits : " << hits << "\n";
+    cache::LFUCache<int> LFUCache(cacheCapacity);
+    cache::IdealCache<int> idealCache(cacheCapacity, queries);
+
+    int idealHits = countCacheHits(idealCache, queries, slowGetPage);
+    int LFUHits   = countCacheHits(LFUCache, queries, slowGetPage);
+
+    std::cout << "Count of       queries    : " << queries.size() << "\n";
+    std::cout << "Count of       cache hits : " << LFUHits << "\n";
+    std::cout << "Count of ideal cache hits : " << idealHits << "\n";
 }
