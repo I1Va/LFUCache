@@ -1,5 +1,5 @@
-#ifndef IDEAL_CACHE_HPP
-#define IDEAL_CACHE_HPP
+#ifndef BELADY_CACHE_HPP
+#define BELADY_CACHE_HPP
 
 #include <list>
 #include <unordered_map>
@@ -19,7 +19,7 @@ const QueryIteration MAX_QUERY_ITERATION = std::numeric_limits<QueryIteration>::
 
 template <typename T, typename KeyT = int>
 
-class IdealCache {
+class BeladyCache {
     using ListIt = typename std::list<T>::iterator;
 
     size_t capacity_ = 0;
@@ -60,22 +60,23 @@ private:
     }
 
 
-    KeyT popSubstitutionKey() {
+    KeyT getSubstitutionKey() {
         while (!keyQueue_.empty()) {
             auto top = keyQueue_.top();
             QueryIteration storedNext = top.first;
             KeyT key = top.second;
-            keyQueue_.pop();
-            if (storedNext == getActualKeyNextQueryIteration(key)) {
+            
+            if (storedNext == getActualKeyNextQueryIteration(key) && hashTable_.find(key) != hashTable_.end()) {
                 return key;
             }
+            keyQueue_.pop();
         }
         assert(0 && "keyQueue_ doesn't contain valid values");
         return 0;
     }
 
 public:
-    IdealCache(const size_t capacity, const std::vector<KeyT> &queries): capacity_(capacity) {
+    BeladyCache(const size_t capacity, const std::vector<KeyT> &queries): capacity_(capacity) {
         for (QueryIteration i = 0; i < queries.size(); i++) {
             if (queryTable_.find(queries[i]) == queryTable_.end())
                 queryTable_[queries[i]] = std::queue<QueryIteration>();
@@ -92,32 +93,47 @@ public:
         }
     }
 
+    void printCache(std::priority_queue<std::pair<QueryIteration, KeyT>, std::vector<std::pair<QueryIteration, KeyT>>> keyQueue) {
+        std::cout << "cache : ";
+        while (keyQueue.size()) {
+            std::cout << keyQueue.top().second << " ";
+            keyQueue.pop();
+        }
+        std::cout << "\n";
+    }
+
     template <typename F>
     bool lookupUpdate(KeyT key, F slowGetPage) {
+        if (capacity_ == 0) return false;
         assert(valid());
 
         updateQueryTable(key);
-
         auto hit = hashTable_.find(key);
-    
+        
         if (hit == hashTable_.end()) {
-            if (!full()) {
-                cache_.push_front(slowGetPage(key));
-                hashTable_[key] = cache_.begin();
-            } else {
-                KeyT subKey = popSubstitutionKey();
+            // Miss
+          
+            if (full()) {
+                KeyT subKey = getSubstitutionKey();
+                if (getActualKeyNextQueryIteration(subKey) <= getActualKeyNextQueryIteration(key)) {
+                    return false;
+                }
+                
+                
                 ListIt subPos = hashTable_[subKey];
-            
                 *subPos = slowGetPage(key);
-
                 hashTable_.erase(subKey);
                 hashTable_[key] = subPos;
+            } else {
+                cache_.push_front(slowGetPage(key));
+                hashTable_[key] = cache_.begin();
             }
-            keyQueue_.push({getActualKeyNextQueryIteration(key), key});
 
-            return false;          
-        }    
-        
+            
+            keyQueue_.push({getActualKeyNextQueryIteration(key), key});            
+            return false;
+        }
+    
         refreshKey(key);
         return true;
     }
@@ -126,4 +142,4 @@ public:
 } // namespace test
 
 
-#endif // IDEAL_CACHE_HPP
+#endif // Belady_CACHE_HPP

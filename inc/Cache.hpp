@@ -1,7 +1,7 @@
 #ifndef CACHE_HPP
 #define CACHE_HPP
 
-#include "IdealCache.hpp"
+#include "BeladyCache.hpp"
 #include "LFUCache.hpp"
 
 
@@ -12,7 +12,7 @@ template <typename DataT>
 struct isCacheType<cache::LFUCache<DataT>> : std::true_type {};
 
 template <typename DataT>
-struct isCacheType<cache::IdealCache<DataT>> : std::true_type {};
+struct isCacheType<cache::BeladyCache<DataT>> : std::true_type {};
 
 template <typename T>
 concept CacheType = isCacheType<T>::value;

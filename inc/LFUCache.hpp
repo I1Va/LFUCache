@@ -5,7 +5,6 @@
 #include <cassert>
 #include <unordered_map>
 
-
 namespace cache
 {
 
@@ -18,6 +17,20 @@ struct LFUCacheNode {
     T data_;
     FreqT freq_;
 };
+
+template <typename T>
+std::ostream &operator<<(std::ostream &stream, const LFUCacheNode<T> &cacheNode) {
+    std::cout << cacheNode.key_;
+    return stream;
+}
+
+template <typename T>
+std::ostream &operator<<(std::ostream &stream, const std::list<LFUCacheNode<T>> &freqList) {
+    for (auto to : freqList) {
+        std::cout << to << " ";
+    }
+    return stream;
+}
 
 template <typename T>
 class LFUCache {
@@ -35,6 +48,21 @@ class LFUCache {
 private:
     bool full() const { return (size_ == capacity_); }
     
+    void recomputeMinFreq() {
+        if (freqTable_.empty()) { minFreq_ = 0; return; }
+
+        bool minFreqSet = false;
+        for (auto &[freq, list] : freqTable_) {
+            if (!list.empty() ) {
+                if (!minFreqSet) {
+                    minFreqSet = true;
+                    minFreq_ = freq;
+                }
+                minFreq_ = std::min(minFreq_, freq);
+            }
+        }
+    }
+    
     void refreshKey(const KeyT key) {
         assert(hashTable_.find(key) != hashTable_.end());
         
@@ -46,7 +74,10 @@ private:
         assert(cacheListIt->freq_ != oldFreq);
     
         freqTable_[cacheListIt->freq_].splice(freqTable_[cacheListIt->freq_].end(), freqTable_[oldFreq], cacheListIt);
-        if (freqTable_[oldFreq].empty() && oldFreq == minFreq_) minFreq_++;
+        if (freqTable_[oldFreq].empty() && oldFreq == minFreq_) {
+            freqTable_.erase(oldFreq);
+            recomputeMinFreq();
+        }
     }
 
     void removeLFUNode() {
@@ -58,7 +89,10 @@ private:
         freqTable_[minFreq_].pop_front();
         size_--;
     
-        if (freqTable_[minFreq_].empty()) minFreq_++;
+        if (freqTable_[minFreq_].empty()) {
+            freqTable_.erase(minFreq_);
+            recomputeMinFreq();
+        }
     }    
 
 public:
@@ -66,7 +100,7 @@ public:
 
     template <typename F>
     bool lookupUpdate(KeyT key, F slowGetPage) {
-        if (capacity_ == 0) return true;
+        if (capacity_ == 0) return false;
 
         assert(hashTable_.size() <= capacity_);
         assert(size_ <= capacity_);
@@ -86,6 +120,18 @@ public:
         refreshKey(key);
 
         return true;
+    }
+
+    void print() {
+        std::cout << "LFU CACHE:\n";
+        std::cout << "cap     : " << capacity_ << "\n";
+        std::cout << "minFreq : " << minFreq_ << "\n";
+        std::cout << "FREQ TABLE : \n";
+
+        for (auto &[key, val] : freqTable_) {
+            std::cout << key << " : " << val << "\n";
+        }
+        std::cout << "\n";
     }
 };
 
