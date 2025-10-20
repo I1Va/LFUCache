@@ -44,7 +44,7 @@ private:
     }   
 
     QueryIteration getActualKeyNextQueryIteration(const KeyT &key) {
-        assert(queryTable_.find(key) != queryTable_.end());
+        assert(queryTable_.contains(key));
     
         std::queue<QueryIteration> &queryTableQueue = queryTable_.find(key)->second;
         assert(!queryTableQueue.empty());
@@ -57,19 +57,22 @@ private:
         keyQueue_.push({ActualKeyNextQueryIteration, key});
     }
 
-    KeyT getSubstitutionKey() {
+    const KeyT &getSubKey() {    
         while (!keyQueue_.empty()) {
             auto &top = keyQueue_.top();
             QueryIteration storedNext = top.first;
-            const KeyT &key = top.second;
+            const KeyT &subKey = top.second;
             
-            if (storedNext == getActualKeyNextQueryIteration(key) && hashTable_.find(key) != hashTable_.end()) {
-                return key;
-            }
+            if (storedNext == getActualKeyNextQueryIteration(subKey) && hashTable_.contains(subKey))
+                return subKey;
+            
             keyQueue_.pop();
         }
+
         assert(0 && "keyQueue_ doesn't contain valid values");
-        return 0;
+        
+        static KeyT defaultKey{};
+        return defaultKey;
     }
 
 public:
@@ -80,7 +83,7 @@ public:
         QueryIteration i = 0;
         for (IterT it = beginIt; it != endIt; it++) {
             KeyT &key = *it;
-            if (queryTable_.find(key) == queryTable_.end())
+            if (!queryTable_.contains(key))
                 queryTable_[key] = std::queue<QueryIteration>();
             queryTable_[key].push(i++);
         }
@@ -98,21 +101,18 @@ public:
     }
 
     template <typename F>
-    bool lookupUpdate(KeyT key, F slowGetPage) {
+    bool lookupUpdate(const KeyT &key, F slowGetPage) {
         if (capacity_ == 0) return false;
         assert(valid());
 
         updateQueryTable(key);
-        auto hit = hashTable_.find(key);
-        
-        if (hit == hashTable_.end()) {
+
+        if (!hashTable_.contains(key)) {
             if (full()) {
-                KeyT subKey = getSubstitutionKey();
-                if (getActualKeyNextQueryIteration(subKey) <= getActualKeyNextQueryIteration(key)) {
+                const KeyT &subKey = getSubKey();
+                if (getActualKeyNextQueryIteration(subKey) <= getActualKeyNextQueryIteration(key))
                     return false;
-                }
-                
-                
+
                 ListIt subPos = hashTable_[subKey];
                 *subPos = slowGetPage(key);
                 hashTable_.erase(subKey);
