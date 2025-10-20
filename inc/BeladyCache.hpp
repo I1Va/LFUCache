@@ -15,9 +15,9 @@ namespace cache
 {
 
 using QueryIteration = int;
-const QueryIteration MAX_QUERY_ITERATION = std::numeric_limits<QueryIteration>::max();
+constexpr inline QueryIteration MAX_QUERY_ITERATION = std::numeric_limits<QueryIteration>::max();
 
-template <typename T, typename KeyT = int>
+template <typename T, typename KeyT>
 
 class BeladyCache {
     using ListIt = typename std::list<T>::iterator;
@@ -30,13 +30,10 @@ class BeladyCache {
     std::priority_queue<std::pair<QueryIteration, KeyT>, std::vector<std::pair<QueryIteration, KeyT>>> keyQueue_;
 
 private:
-    bool valid() const {
-        return cache_.size() <= capacity_ && hashTable_.size() <= capacity_;
-    }
-
+    bool valid() const { return cache_.size() <= capacity_ && hashTable_.size() <= capacity_; }
     bool full() const { return (cache_.size() == capacity_); }
     
-    void updateQueryTable(const KeyT key) {
+    void updateQueryTable(const KeyT &key) {
         auto it = queryTable_.find(key);
         assert(it != queryTable_.end());
         
@@ -46,25 +43,25 @@ private:
         queryTableQueue.pop();      
     }   
 
-    QueryIteration getActualKeyNextQueryIteration(const KeyT key) {
+    QueryIteration getActualKeyNextQueryIteration(const KeyT &key) {
         assert(queryTable_.find(key) != queryTable_.end());
+    
         std::queue<QueryIteration> &queryTableQueue = queryTable_.find(key)->second;
         assert(!queryTableQueue.empty());
        
         return queryTableQueue.front();
     }
 
-    void refreshKey(const KeyT key) {
+    void refreshKey(const KeyT &key) {
         QueryIteration ActualKeyNextQueryIteration = getActualKeyNextQueryIteration(key);
         keyQueue_.push({ActualKeyNextQueryIteration, key});
     }
 
-
     KeyT getSubstitutionKey() {
         while (!keyQueue_.empty()) {
-            auto top = keyQueue_.top();
+            auto &top = keyQueue_.top();
             QueryIteration storedNext = top.first;
-            KeyT key = top.second;
+            const KeyT &key = top.second;
             
             if (storedNext == getActualKeyNextQueryIteration(key) && hashTable_.find(key) != hashTable_.end()) {
                 return key;
@@ -76,21 +73,19 @@ private:
     }
 
 public:
-    BeladyCache(const size_t capacity, const std::vector<KeyT> &queries): capacity_(capacity) {
-        for (QueryIteration i = 0; i < queries.size(); i++) {
-            if (queryTable_.find(queries[i]) == queryTable_.end())
-                queryTable_[queries[i]] = std::queue<QueryIteration>();
-            queryTable_[queries[i]].push(i);
+    template <typename IterT>
+    requires std::same_as<typename std::iterator_traits<IterT>::value_type, KeyT>
+    BeladyCache(const size_t capacity, const IterT beginIt, const IterT endIt): capacity_(capacity) 
+    {
+        QueryIteration i = 0;
+        for (IterT it = beginIt; it != endIt; it++) {
+            KeyT &key = *it;
+            if (queryTable_.find(key) == queryTable_.end())
+                queryTable_[key] = std::queue<QueryIteration>();
+            queryTable_[key].push(i++);
         }
 
-        std::unordered_set<KeyT> used;
-        for (QueryIteration i = 0; i < queries.size(); i++) {
-            KeyT key = queries[i];
-            if (used.find(key) == used.end()) {
-                used.insert(key);
-                queryTable_[key].push(MAX_QUERY_ITERATION);
-            }
-        }
+        for (auto &[key, container] : queryTable_) container.push(MAX_QUERY_ITERATION);
     }
 
     void printCache(std::priority_queue<std::pair<QueryIteration, KeyT>, std::vector<std::pair<QueryIteration, KeyT>>> keyQueue) {

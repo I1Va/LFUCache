@@ -25,7 +25,7 @@ TEST(Auto, BeladyCacheComprasion) {
     std::vector<int> queries = test::randomIntVector(QUERIES_COUNT, -1000, 1000);
 
     cache::LFUCache<test::Page> LFUcache(CACHE_CAPACITY);
-    cache::BeladyCache<test::Page> BeladyCache(CACHE_CAPACITY, queries);
+    cache::BeladyCache<test::Page, int> BeladyCache(CACHE_CAPACITY, queries.begin(), queries.end());
     
     int LFUHits = countCacheHits(LFUcache, queries, test::slowGetPage);
     int BeladyHits = countCacheHits(BeladyCache, queries, test::slowGetPage);
@@ -85,7 +85,7 @@ TEST(Belady, BasicHit) {
     const size_t CACHE_CAPACITY = 2;
     // queries passed to constructor so BeladyCache knows future accesses
     std::vector<int> queries = {1, 2, 1};
-    cache::BeladyCache<test::Page> Belady(CACHE_CAPACITY, queries);
+    cache::BeladyCache<test::Page, int> Belady(CACHE_CAPACITY, queries.begin(), queries.end());
 
     int hits = 0;
     for (int q : queries) hits += Belady.lookupUpdate(q, test::slowGetPage);
@@ -97,7 +97,7 @@ TEST(Belady, SequentialUniqueCapacityOne) {
     const size_t CACHE_CAPACITY = 1;
     // unique sequential accesses -> no hits for capacity 1
     std::vector<int> queries = {1, 2, 3};
-    cache::BeladyCache<test::Page> Belady(CACHE_CAPACITY, queries);
+    cache::BeladyCache<test::Page, int> Belady(CACHE_CAPACITY, queries.begin(), queries.end());
 
     int hits = 0;
     for (int q : queries) hits += Belady.lookupUpdate(q, test::slowGetPage);
@@ -109,7 +109,7 @@ TEST(Belady, RepeatedPatternHighHitRate2) {
     const size_t CACHE_CAPACITY = 2;
     // repeated alternation: 1,2,1,2,1,2 -> after warmup should hit frequently
     std::vector<int> queries = {1, 2, 1, 2, 1, 2};
-    cache::BeladyCache<test::Page> Belady(CACHE_CAPACITY, queries);
+    cache::BeladyCache<test::Page, int> Belady(CACHE_CAPACITY, queries.begin(), queries.end());
 
     int hits = 0;
     for (int q : queries) hits += Belady.lookupUpdate(q, test::slowGetPage);
@@ -127,7 +127,7 @@ TEST(Compare, UniformRandom) {
     std::vector<int> queries = test::randomIntVector(QUERIES_COUNT, -1000, 1000);
 
     cache::LFUCache<test::Page> lfu(CACHE_CAPACITY);
-    cache::BeladyCache<test::Page> Belady(CACHE_CAPACITY, queries);
+    cache::BeladyCache<test::Page, int> Belady(CACHE_CAPACITY, queries.begin(), queries.end());
 
     int lfu_hits   = countCacheHits(lfu, queries, test::slowGetPage);
     int Belady_hits = countCacheHits(Belady, queries, test::slowGetPage);
@@ -182,7 +182,7 @@ TEST(LFU, RepeatedPattern) {
 TEST(Belady, BasicHit2) {
     const size_t CACHE_CAPACITY = 2;
     std::vector<int> queries = {1, 2, 1};
-    cache::BeladyCache<test::Page> Belady(CACHE_CAPACITY, queries);
+    cache::BeladyCache<test::Page, int> Belady(CACHE_CAPACITY, queries.begin(), queries.end());
 
     int hits = countCacheHits(Belady, queries, test::slowGetPage);
     EXPECT_EQ(hits, 1);
@@ -191,7 +191,7 @@ TEST(Belady, BasicHit2) {
 TEST(Belady, EvictByBelady1) {
     const size_t CACHE_CAPACITY = 2;
     std::vector<int> queries = {1, 2, 1, 3};
-    cache::BeladyCache<test::Page> Belady(CACHE_CAPACITY, queries);
+    cache::BeladyCache<test::Page, int> Belady(CACHE_CAPACITY, queries.begin(), queries.end());
 
     int hits = countCacheHits(Belady, queries, test::slowGetPage);
     EXPECT_EQ(hits, 1);
@@ -200,7 +200,7 @@ TEST(Belady, EvictByBelady1) {
 TEST(Belady, RepeatedPatternHighHitRate1) {
     const size_t CACHE_CAPACITY = 2;
     std::vector<int> queries = {1,2,1,2,1,2};
-    cache::BeladyCache<test::Page> Belady(CACHE_CAPACITY, queries);
+    cache::BeladyCache<test::Page, int> Belady(CACHE_CAPACITY, queries.begin(), queries.end());
 
     int hits = countCacheHits(Belady, queries, test::slowGetPage);
     EXPECT_EQ(hits, 4);
@@ -232,7 +232,7 @@ TEST(Compare, SmallCache) {
     std::vector<int> queries = {1,2,3,1,2,3,1,2,3,4,5,6};
 
     cache::LFUCache<test::Page> lfu(CACHE_CAP);
-    cache::BeladyCache<test::Page> Belady(CACHE_CAP, queries);
+    cache::BeladyCache<test::Page, int> Belady(CACHE_CAP, queries.begin(), queries.end());
 
     int lfu_hits   = countCacheHits(lfu, queries, test::slowGetPage);
     int Belady_hits = countCacheHits(Belady, queries, test::slowGetPage);
@@ -259,7 +259,7 @@ TEST(LFU, EvictHotCold) {
 
 TEST(Belady, EvictByBelady) {
     std::vector<int> queries = {1,2,1,3};
-    cache::BeladyCache<test::Page> Belady(2, queries);
+    cache::BeladyCache<test::Page, int> Belady(2, queries.begin(), queries.end());
     int hits = countCacheHits(Belady, queries, test::slowGetPage);
     EXPECT_EQ(hits, 1); // only second 1 is a hit
 }
