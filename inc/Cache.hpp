@@ -8,8 +8,8 @@
 template <typename T>
 struct isCacheType : std::false_type {};
 
-template <typename DataT>
-struct isCacheType<cache::LFUCache<DataT>> : std::true_type {};
+template <typename DataT, typename KeyT>
+struct isCacheType<cache::LFUCache<DataT, KeyT>> : std::true_type {};
 
 template <typename DataT, typename KeyT>
 struct isCacheType<cache::BeladyCache<DataT, KeyT>> : std::true_type {};

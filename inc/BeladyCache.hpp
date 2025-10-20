@@ -71,7 +71,7 @@ private:
 
         assert(0 && "keyQueue_ doesn't contain valid values");
         
-        static KeyT defaultKey{};
+        const static KeyT defaultKey{};
         return defaultKey;
     }
 
@@ -82,7 +82,7 @@ public:
     {
         QueryIteration i = 0;
         for (IterT it = beginIt; it != endIt; it++) {
-            KeyT &key = *it;
+            const KeyT &key = *it;
             if (!queryTable_.contains(key))
                 queryTable_[key] = std::queue<QueryIteration>();
             queryTable_[key].push(i++);

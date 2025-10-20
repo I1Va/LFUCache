@@ -66,7 +66,7 @@ LFUCache хранит данные с учетом частоты использ
 **Пример использования LFUCache:**
 
 ```cpp
-cache::LFUCache<test::Page> lfuCache(3);
+cache::LFUCache<test::Page, int> lfuCache(3);
 lfuCache.lookupUpdate(1, test::slowGetPage); // miss
 lfuCache.lookupUpdate(2, test::slowGetPage); // miss
 lfuCache.lookupUpdate(1, test::slowGetPage); // hit

@@ -24,7 +24,7 @@ TEST(Auto, BeladyCacheComprasion) {
 
     std::vector<int> queries = test::randomIntVector(QUERIES_COUNT, -1000, 1000);
 
-    cache::LFUCache<test::Page> LFUcache(CACHE_CAPACITY);
+    cache::LFUCache<test::Page, int> LFUcache(CACHE_CAPACITY);
     cache::BeladyCache<test::Page, int> BeladyCache(CACHE_CAPACITY, queries.begin(), queries.end());
     
     int LFUHits = countCacheHits(LFUcache, queries, test::slowGetPage);
@@ -39,7 +39,7 @@ TEST(Auto, BeladyCacheComprasion) {
 // AI GENERATED TESTS:
 TEST(LFU, BasicHit1) {
     const size_t CACHE_CAPACITY = 2;
-    cache::LFUCache<test::Page> lfu(CACHE_CAPACITY);
+    cache::LFUCache<test::Page, int> lfu(CACHE_CAPACITY);
 
     // sequence: 1 (miss), 2 (miss), 1 (hit)
     std::vector<int> seq = {1, 2, 1};
@@ -51,7 +51,7 @@ TEST(LFU, BasicHit1) {
 
 TEST(LFU, EvictLeastFrequent2) {
     const size_t CACHE_CAPACITY = 2;
-    cache::LFUCache<test::Page> lfu(CACHE_CAPACITY);
+    cache::LFUCache<test::Page, int> lfu(CACHE_CAPACITY);
 
     // Access pattern:
     // 1 (miss), 2 (miss), 1 (hit -> freq(1)=2, freq(2)=1), 3 (miss -> should evict key 2)
@@ -66,7 +66,7 @@ TEST(LFU, EvictLeastFrequent2) {
 
 TEST(LFU, FrequencyDominance) {
     const size_t CACHE_CAPACITY = 2;
-    cache::LFUCache<test::Page> lfu(CACHE_CAPACITY);
+    cache::LFUCache<test::Page, int> lfu(CACHE_CAPACITY);
 
     // Make key 2 dominant in frequency so key 1 gets evicted when 3 inserted.
     // Sequence: 1(miss),2(miss),2(hit),3(miss -> evict 1),2(hit)
@@ -126,7 +126,7 @@ TEST(Compare, UniformRandom) {
     // use project generator for reproducibility if available
     std::vector<int> queries = test::randomIntVector(QUERIES_COUNT, -1000, 1000);
 
-    cache::LFUCache<test::Page> lfu(CACHE_CAPACITY);
+    cache::LFUCache<test::Page, int> lfu(CACHE_CAPACITY);
     cache::BeladyCache<test::Page, int> Belady(CACHE_CAPACITY, queries.begin(), queries.end());
 
     int lfu_hits   = countCacheHits(lfu, queries, test::slowGetPage);
@@ -143,7 +143,7 @@ TEST(Compare, UniformRandom) {
 
 TEST(LFU, BasicHit) {
     const size_t CACHE_CAPACITY = 2;
-    cache::LFUCache<test::Page> lfu(CACHE_CAPACITY);
+    cache::LFUCache<test::Page, int> lfu(CACHE_CAPACITY);
 
     std::vector<int> queries = {1, 2, 1}; // miss, miss, hit
     int hits = countCacheHits(lfu, queries, test::slowGetPage);
@@ -153,7 +153,7 @@ TEST(LFU, BasicHit) {
 
 TEST(LFU, EvictLeastFrequent) {
     const size_t CACHE_CAPACITY = 2;
-    cache::LFUCache<test::Page> lfu(CACHE_CAPACITY);
+    cache::LFUCache<test::Page, int> lfu(CACHE_CAPACITY);
 
     // 1 (miss), 2 (miss), 1 (hit), 3 (miss -> should evict key 2)
     std::vector<int> queries = {1, 2, 1, 3};
@@ -167,7 +167,7 @@ TEST(LFU, EvictLeastFrequent) {
 
 TEST(LFU, RepeatedPattern) {
     const size_t CACHE_CAPACITY = 2;
-    cache::LFUCache<test::Page> lfu(CACHE_CAPACITY);
+    cache::LFUCache<test::Page, int> lfu(CACHE_CAPACITY);
 
     // pattern alternates 1 and 2 -> after warmup most accesses hit
     std::vector<int> queries = {1,2,1,2,1,2};
@@ -231,7 +231,7 @@ TEST(Compare, SmallCache) {
 
     std::vector<int> queries = {1,2,3,1,2,3,1,2,3,4,5,6};
 
-    cache::LFUCache<test::Page> lfu(CACHE_CAP);
+    cache::LFUCache<test::Page, int> lfu(CACHE_CAP);
     cache::BeladyCache<test::Page, int> Belady(CACHE_CAP, queries.begin(), queries.end());
 
     int lfu_hits   = countCacheHits(lfu, queries, test::slowGetPage);
@@ -243,14 +243,14 @@ TEST(Compare, SmallCache) {
 
 // ---------------- LFU-only tests ----------------
 TEST(LFU, RepeatedPattern1) {
-    cache::LFUCache<test::Page> lfu(2);
+    cache::LFUCache<test::Page, int> lfu(2);
     std::vector<int> queries = {1,2,1,2,1,2};
     int hits = countCacheHits(lfu, queries, test::slowGetPage);
     EXPECT_EQ(hits, 4);
 }
 
 TEST(LFU, EvictHotCold) {
-    cache::LFUCache<test::Page> lfu(2);
+    cache::LFUCache<test::Page, int> lfu(2);
     std::vector<int> queries = {1,2,1,3,1,3,1};
     int hits = countCacheHits(lfu, queries, test::slowGetPage);
     EXPECT_EQ(hits, 4); // hits on repeated 1s and 3s
@@ -267,7 +267,7 @@ TEST(Belady, EvictByBelady) {
 // Test 1: Basic over-hitting detection with careful state tracking
 TEST(LFUCacheOverhit, BasicOverhitTest_8294) {
     const size_t CACHE_CAPACITY = 2;
-    cache::LFUCache<test::Page> lfu(CACHE_CAPACITY);
+    cache::LFUCache<test::Page, int> lfu(CACHE_CAPACITY);
 
     // Initial state: empty cache
     EXPECT_FALSE(lfu.lookupUpdate(1, test::slowGetPage)); // miss, cache: [1]
@@ -291,7 +291,7 @@ TEST(LFUCacheOverhit, BasicOverhitTest_8294) {
 // Test 2: Check that we don't get extra hits on evicted items
 TEST(LFUCacheOverhit, NoExtraHits_5731) {
     const size_t CACHE_CAPACITY = 2;
-    cache::LFUCache<test::Page> lfu(CACHE_CAPACITY);
+    cache::LFUCache<test::Page, int> lfu(CACHE_CAPACITY);
 
     // Fill cache
     EXPECT_FALSE(lfu.lookupUpdate(1, test::slowGetPage)); // miss
@@ -318,7 +318,7 @@ TEST(LFUCacheOverhit, NoExtraHits_5731) {
 // Test 3: Simple capacity check - should never have more hits than physically possible
 TEST(LFUCacheOverhit, CapacityCheck_9462) {
     const size_t CACHE_CAPACITY = 2;
-    cache::LFUCache<test::Page> lfu(CACHE_CAPACITY);
+    cache::LFUCache<test::Page, int> lfu(CACHE_CAPACITY);
 
     // Insert 3 different items into capacity-2 cache
     EXPECT_FALSE(lfu.lookupUpdate(1, test::slowGetPage)); // miss
@@ -341,7 +341,7 @@ TEST(LFUCacheOverhit, CapacityCheck_9462) {
 // Test 4: Deterministic frequency-based eviction
 TEST(LFUCacheOverhit, FrequencyEviction_3857) {
     const size_t CACHE_CAPACITY = 2;
-    cache::LFUCache<test::Page> lfu(CACHE_CAPACITY);
+    cache::LFUCache<test::Page, int> lfu(CACHE_CAPACITY);
 
     // Setup: make 1 high frequency, 2 low frequency
     EXPECT_FALSE(lfu.lookupUpdate(1, test::slowGetPage)); // miss
@@ -366,7 +366,7 @@ TEST(LFUCacheOverhit, PureOverhitTest_7126) {
     
     // We'll run the same test twice to verify consistent behavior
     for (int run = 0; run < 2; run++) {
-        cache::LFUCache<test::Page> lfu(CACHE_CAPACITY);
+        cache::LFUCache<test::Page, int> lfu(CACHE_CAPACITY);
         
         // Pattern: 1, 2, 1, 3 (forces eviction of 2)
         EXPECT_FALSE(lfu.lookupUpdate(1, test::slowGetPage));

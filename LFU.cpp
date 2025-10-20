@@ -24,7 +24,7 @@ int main() {
         if (ut::logIfstreamError(std::cin, std::cerr)) return 1; 
     }
 
-    cache::LFUCache<int> LFUCache(cap);
+    cache::LFUCache<int, int> LFUCache(cap);
     int hits = countCacheHits(LFUCache, queries, slowGetPage);
 
     std::cout << hits << '\n';
