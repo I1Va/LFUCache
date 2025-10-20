@@ -31,8 +31,8 @@ TEST(Auto, BeladyCacheComprasion) {
     int BeladyHits = countCacheHits(BeladyCache, queries, test::slowGetPage);
    
 
-    std::cout << "queries count : " << QUERIES_COUNT << "\n";
-    std::cout << "LFU / Belady hits: " << LFUHits << " / " << BeladyHits << "\n";
+    std::cout << "queries count : " << QUERIES_COUNT << '\n';
+    std::cout << "LFU / Belady hits: " << LFUHits << " / " << BeladyHits << '\n';
 }
 
 

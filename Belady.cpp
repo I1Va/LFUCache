@@ -11,7 +11,7 @@ int main() {
 
     std::cin >> cap >> queriesCount;
     if (queriesCount <= 0) {
-        std::cout << 0 << "\n";
+        std::cout << 0 << '\n';
         return 0;
     }
 
@@ -23,5 +23,5 @@ int main() {
     cache::BeladyCache<int> beladyCache(cap, queries);
     int hits = countCacheHits(beladyCache, queries, slowGetPage);
 
-    std::cout << hits << "\n";
+    std::cout << hits << '\n';
 }

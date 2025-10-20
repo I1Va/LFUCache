@@ -99,7 +99,7 @@ public:
             std::cout << keyQueue.top().second << " ";
             keyQueue.pop();
         }
-        std::cout << "\n";
+        std::cout << '\n';
     }
 
     template <typename F>
@@ -111,8 +111,6 @@ public:
         auto hit = hashTable_.find(key);
         
         if (hit == hashTable_.end()) {
-            // Miss
-          
             if (full()) {
                 KeyT subKey = getSubstitutionKey();
                 if (getActualKeyNextQueryIteration(subKey) <= getActualKeyNextQueryIteration(key)) {

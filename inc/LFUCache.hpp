@@ -124,14 +124,14 @@ public:
 
     void print() {
         std::cout << "LFU CACHE:\n";
-        std::cout << "cap     : " << capacity_ << "\n";
-        std::cout << "minFreq : " << minFreq_ << "\n";
+        std::cout << "cap     : " << capacity_ << '\n';
+        std::cout << "minFreq : " << minFreq_ << '\n';
         std::cout << "FREQ TABLE : \n";
 
         for (auto &[key, val] : freqTable_) {
-            std::cout << key << " : " << val << "\n";
+            std::cout << key << " : " << val << '\n';
         }
-        std::cout << "\n";
+        std::cout << '\n';
     }
 };
 
