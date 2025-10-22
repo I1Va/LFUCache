@@ -19,14 +19,14 @@ struct LFUCacheNode {
 
 template <typename T, typename KeyT>
 std::ostream &operator<<(std::ostream &stream, const LFUCacheNode<T, KeyT> &cacheNode) {
-    std::cout << cacheNode.key_;
+    stream << cacheNode.key_;
     return stream;
 }
 
 template <typename T, typename KeyT>
 std::ostream &operator<<(std::ostream &stream, const std::list<LFUCacheNode<T, KeyT>> &freqList) {
     for (auto to : freqList) {
-        std::cout << to << " ";
+        stream << to << " ";
     }
     return stream;
 }
@@ -109,7 +109,7 @@ public:
         return true;
     }
 
-    void print() {
+    void print() const {
         std::cout << "LFU CACHE:\n";
         std::cout << "cap     : " << capacity_ << '\n';
         std::cout << "minFreq : " << minFreq_ << '\n';

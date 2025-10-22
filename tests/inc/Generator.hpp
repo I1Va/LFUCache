@@ -8,8 +8,8 @@
 namespace test
 {
 
-const int RAND_INT_MAX = INT_MAX / 2;
-const int RAND_INT_MIN = INT_MIN / 2;
+inline constexpr int RAND_INT_MAX = INT_MAX / 2;
+inline constexpr int RAND_INT_MIN = INT_MIN / 2;
 
 inline double randomDouble() {
     static std::random_device rd;

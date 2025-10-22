@@ -6,21 +6,25 @@
 
 namespace ut {
 
-bool logIfstreamError(const std::istream &inputStream, std::ostream &outputStream) {
+inline bool logIfstreamError(const std::istream &inputStream, std::ostream &outputStream=std::cerr) {
     if (inputStream.good()) return false; 
 
     if (inputStream.bad()) {
-        std::cerr << "Fatal I/O error while reading.\n";
-        return true;
-    } else if (inputStream.fail()) {
-        std::cerr << "Logical read error (e.g., wrong type).\n";
-        return true;
-    } else if (inputStream.eof()) {
-        std::cout << "Reached end of file.\n";
-        return true;
-    } else {
+        outputStream << "Fatal I/O error while reading.\n";
         return true;
     }
+
+    if (inputStream.fail()) {
+        outputStream << "Logical read error (e.g., wrong type).\n";
+        return true;
+    }
+     
+    if (inputStream.eof()) {
+        outputStream << "Reached end of file.\n";
+        return true;
+    }
+
+    return true;
 }
 
 } // namespace ut
