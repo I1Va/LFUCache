@@ -21,7 +21,7 @@ int main() {
     }
 
     cache::BeladyCache<int, int> beladyCache(cap, queries.begin(), queries.end());
-    int hits = countCacheHits(beladyCache, queries, slowGetPage);
+    int hits = countCacheHits(beladyCache, queries.begin(), queries.end(), slowGetPage);
 
     std::cout << hits << '\n';
 }

@@ -91,7 +91,7 @@ public:
         for (auto &[key, container] : queryTable_) container.push(MAX_QUERY_ITERATION);
     }
 
-    void printCache(std::priority_queue<std::pair<QueryIteration, KeyT>, std::vector<std::pair<QueryIteration, KeyT>>> keyQueue) {
+    void printCache(std::priority_queue<std::pair<QueryIteration, KeyT>, std::vector<std::pair<QueryIteration, KeyT>>> keyQueue) const {
         std::cout << "cache : ";
         while (keyQueue.size()) {
             std::cout << keyQueue.top().second << " ";
@@ -135,4 +135,4 @@ public:
 } // namespace test
 
 
-#endif // Belady_CACHE_HPP
+#endif // Belady_CACHE_HPPs

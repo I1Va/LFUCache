@@ -25,7 +25,7 @@ int main() {
     }
 
     cache::LFUCache<int, int> LFUCache(cap);
-    int hits = countCacheHits(LFUCache, queries, slowGetPage);
+    int hits = countCacheHits(LFUCache, queries.begin(), queries.end(), slowGetPage);
 
     std::cout << hits << '\n';
 }

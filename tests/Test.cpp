@@ -27,8 +27,8 @@ TEST(Auto, BeladyCacheComprasion) {
     cache::LFUCache<test::Page, int> LFUcache(CACHE_CAPACITY);
     cache::BeladyCache<test::Page, int> BeladyCache(CACHE_CAPACITY, queries.begin(), queries.end());
     
-    int LFUHits = countCacheHits(LFUcache, queries, test::slowGetPage);
-    int BeladyHits = countCacheHits(BeladyCache, queries, test::slowGetPage);
+    int LFUHits = countCacheHits(LFUcache, queries.begin(), queries.end(), test::slowGetPage);
+    int BeladyHits = countCacheHits(BeladyCache, queries.begin(), queries.end(), test::slowGetPage);
    
 
     std::cout << "queries count : " << QUERIES_COUNT << '\n';
@@ -129,8 +129,8 @@ TEST(Compare, UniformRandom) {
     cache::LFUCache<test::Page, int> lfu(CACHE_CAPACITY);
     cache::BeladyCache<test::Page, int> Belady(CACHE_CAPACITY, queries.begin(), queries.end());
 
-    int lfu_hits   = countCacheHits(lfu, queries, test::slowGetPage);
-    int Belady_hits = countCacheHits(Belady, queries, test::slowGetPage);
+    int lfu_hits   = countCacheHits(lfu, queries.begin(), queries.end(), test::slowGetPage);
+    int Belady_hits = countCacheHits(Belady, queries.begin(), queries.end(), test::slowGetPage);
 
     double lfu_pct = 100.0 * lfu_hits / (double)QUERIES_COUNT;
     double Belady_pct = 100.0 * Belady_hits / (double)QUERIES_COUNT;
@@ -146,7 +146,7 @@ TEST(LFU, BasicHit) {
     cache::LFUCache<test::Page, int> lfu(CACHE_CAPACITY);
 
     std::vector<int> queries = {1, 2, 1}; // miss, miss, hit
-    int hits = countCacheHits(lfu, queries, test::slowGetPage);
+    int hits = countCacheHits(lfu, queries.begin(), queries.end(), test::slowGetPage);
 
     EXPECT_EQ(hits, 1);
 }
@@ -157,7 +157,7 @@ TEST(LFU, EvictLeastFrequent) {
 
     // 1 (miss), 2 (miss), 1 (hit), 3 (miss -> should evict key 2)
     std::vector<int> queries = {1, 2, 1, 3};
-    int hits = countCacheHits(lfu, queries, test::slowGetPage);
+    int hits = countCacheHits(lfu, queries.begin(), queries.end(), test::slowGetPage);
 
     EXPECT_EQ(hits, 1); // only the 3rd access (second '1') is a hit in this sequence
     // additional sanity: 1 should still be a hit, 2 should be miss
@@ -171,7 +171,7 @@ TEST(LFU, RepeatedPattern) {
 
     // pattern alternates 1 and 2 -> after warmup most accesses hit
     std::vector<int> queries = {1,2,1,2,1,2};
-    int hits = countCacheHits(lfu, queries, test::slowGetPage);
+    int hits = countCacheHits(lfu, queries.begin(), queries.end(), test::slowGetPage);
 
     // first two accesses are misses, remaining four are hits
     EXPECT_EQ(hits, 4);
@@ -184,7 +184,7 @@ TEST(Belady, BasicHit2) {
     std::vector<int> queries = {1, 2, 1};
     cache::BeladyCache<test::Page, int> Belady(CACHE_CAPACITY, queries.begin(), queries.end());
 
-    int hits = countCacheHits(Belady, queries, test::slowGetPage);
+    int hits = countCacheHits(Belady, queries.begin(), queries.end(), test::slowGetPage);
     EXPECT_EQ(hits, 1);
 }
 
@@ -193,7 +193,7 @@ TEST(Belady, EvictByBelady1) {
     std::vector<int> queries = {1, 2, 1, 3};
     cache::BeladyCache<test::Page, int> Belady(CACHE_CAPACITY, queries.begin(), queries.end());
 
-    int hits = countCacheHits(Belady, queries, test::slowGetPage);
+    int hits = countCacheHits(Belady, queries.begin(), queries.end(), test::slowGetPage);
     EXPECT_EQ(hits, 1);
 }
 
@@ -202,7 +202,7 @@ TEST(Belady, RepeatedPatternHighHitRate1) {
     std::vector<int> queries = {1,2,1,2,1,2};
     cache::BeladyCache<test::Page, int> Belady(CACHE_CAPACITY, queries.begin(), queries.end());
 
-    int hits = countCacheHits(Belady, queries, test::slowGetPage);
+    int hits = countCacheHits(Belady, queries.begin(), queries.end(), test::slowGetPage);
     EXPECT_EQ(hits, 4);
 }
 
@@ -234,8 +234,8 @@ TEST(Compare, SmallCache) {
     cache::LFUCache<test::Page, int> lfu(CACHE_CAP);
     cache::BeladyCache<test::Page, int> Belady(CACHE_CAP, queries.begin(), queries.end());
 
-    int lfu_hits   = countCacheHits(lfu, queries, test::slowGetPage);
-    int Belady_hits = countCacheHits(Belady, queries, test::slowGetPage);
+    int lfu_hits   = countCacheHits(lfu, queries.begin(), queries.end(), test::slowGetPage);
+    int Belady_hits = countCacheHits(Belady, queries.begin(), queries.end(), test::slowGetPage);
 
     EXPECT_LE(lfu_hits, Belady_hits);
     EXPECT_GE(lfu_hits, 2); // should get at least some hits
@@ -245,14 +245,14 @@ TEST(Compare, SmallCache) {
 TEST(LFU, RepeatedPattern1) {
     cache::LFUCache<test::Page, int> lfu(2);
     std::vector<int> queries = {1,2,1,2,1,2};
-    int hits = countCacheHits(lfu, queries, test::slowGetPage);
+    int hits = countCacheHits(lfu, queries.begin(), queries.end(), test::slowGetPage);
     EXPECT_EQ(hits, 4);
 }
 
 TEST(LFU, EvictHotCold) {
     cache::LFUCache<test::Page, int> lfu(2);
     std::vector<int> queries = {1,2,1,3,1,3,1};
-    int hits = countCacheHits(lfu, queries, test::slowGetPage);
+    int hits = countCacheHits(lfu, queries.begin(), queries.end(), test::slowGetPage);
     EXPECT_EQ(hits, 4); // hits on repeated 1s and 3s
 }
 
@@ -260,7 +260,7 @@ TEST(LFU, EvictHotCold) {
 TEST(Belady, EvictByBelady) {
     std::vector<int> queries = {1,2,1,3};
     cache::BeladyCache<test::Page, int> Belady(2, queries.begin(), queries.end());
-    int hits = countCacheHits(Belady, queries, test::slowGetPage);
+    int hits = countCacheHits(Belady, queries.begin(), queries.end(), test::slowGetPage);
     EXPECT_EQ(hits, 1); // only second 1 is a hit
 }
 
