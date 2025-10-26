@@ -1,3 +1,5 @@
 build
 .vscode
 tmp.cpp
+
+.clang-format

@@ -20,8 +20,10 @@ int main() {
         std::cin >> queries[i];
     }
 
-    cache::BeladyCache<int, int> beladyCache(cap, queries.begin(), queries.end());
-    int hits = countCacheHits(beladyCache, queries.begin(), queries.end(), slowGetPage);
+    cache::BeladyCache<int, int> beladyCache(cap, queries.begin(),
+                                             queries.end());
+    int hits = countCacheHits(beladyCache, queries.begin(), queries.end(),
+                              slowGetPage);
 
     std::cout << hits << '\n';
 }

@@ -1,12 +1,11 @@
 #ifndef GENERATOR_HPP
 #define GENERATOR_HPP
 
+#include <limits.h>
 #include <random>
 #include <vector>
-#include <limits.h>
 
-namespace test
-{
+namespace test {
 
 inline constexpr int RAND_INT_MAX = INT_MAX / 2;
 inline constexpr int RAND_INT_MIN = INT_MIN / 2;
@@ -19,14 +18,15 @@ inline double randomDouble() {
 }
 
 inline double randomInt(int min, int max) {
-    return min + (int) ((max-min)*randomDouble());
+    return min + (int)((max - min) * randomDouble());
 }
 
 inline double randomDouble(double min, double max) {
-    return min + (max-min)*randomDouble();
+    return min + (max - min) * randomDouble();
 }
 
-inline std::vector<int> randomIntVector(const size_t size, const int min, const int max) {
+inline std::vector<int> randomIntVector(const size_t size, const int min,
+                                        const int max) {
     std::vector<int> vec;
     vec.reserve(size);
 
@@ -37,6 +37,5 @@ inline std::vector<int> randomIntVector(const size_t size, const int min, const 
 }
 
 } // namespace test
-
 
 #endif // GENERATOR_HPP

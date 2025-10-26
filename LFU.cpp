@@ -11,7 +11,8 @@ int main() {
     int queriesCount = 0;
 
     std::cin >> cap >> queriesCount;
-    if (ut::logIfstreamError(std::cin, std::cerr)) return 1; 
+    if (ut::logIfstreamError(std::cin, std::cerr))
+        return 1;
 
     if (queriesCount <= 0) {
         std::cout << 0 << '\n';
@@ -21,11 +22,13 @@ int main() {
     std::vector<int> queries(queriesCount);
     for (int i = 0; i < queriesCount; i++) {
         std::cin >> queries[i];
-        if (ut::logIfstreamError(std::cin, std::cerr)) return 1; 
+        if (ut::logIfstreamError(std::cin, std::cerr))
+            return 1;
     }
 
     cache::LFUCache<int, int> LFUCache(cap);
-    int hits = countCacheHits(LFUCache, queries.begin(), queries.end(), slowGetPage);
+    int hits =
+        countCacheHits(LFUCache, queries.begin(), queries.end(), slowGetPage);
 
     std::cout << hits << '\n';
 }
