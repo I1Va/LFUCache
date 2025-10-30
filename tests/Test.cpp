@@ -256,7 +256,6 @@ std::vector<int> skewedQueries(int n, int hotKey, double hotFrac = 0.7) {
 }
 
 TEST(Compare, SmallCache) {
-    const int N = 200;
     const int CACHE_CAP = 5;
 
     std::vector<int> queries = {1, 2, 3, 1, 2, 3, 1, 2, 3, 4, 5, 6};

@@ -10,7 +10,7 @@ struct Page {
     Page(int val) : val_(val) {};
 };
 
-inline Page slowGetPage(int key) {
+inline Page slowGetPage([[maybe_unused]] int key) {
     return Page(randomInt(RAND_INT_MIN, RAND_INT_MAX));
 }
 } // namespace test

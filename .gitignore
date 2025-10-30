@@ -3,3 +3,4 @@ build
 tmp.cpp
 
 .clang-format
+notes

@@ -3,7 +3,7 @@
 
 #include "Cache.hpp"
 
-int slowGetPage(int key) { return 0; }
+int slowGetPage(int key) { return key; }
 
 int main() {
     int cap = 0;

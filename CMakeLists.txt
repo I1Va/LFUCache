@@ -1,30 +1,32 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.20)
 project(LFUCache LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-option(SANITIZE OFF)
+set(CMAKE_CXX_STANDARD 23)
 
-if(SANITIZE)
-    message(STATUS "Sanitizers enabled")
+option(SANITIZE "Enable compiler sanitizers" OFF)
+option(BUILD_TESTS "Build unit tests" ON)
 
-    set(SAN_FLAGS "-fsanitize=address,undefined")
-
-    add_compile_options(${SAN_FLAGS})
-    add_link_options(${SAN_FLAGS})
+if (MSVC)
+    add_compile_options(/W4 /WX)
 else()
-    message(STATUS "Sanitizers disabled")
+    add_compile_options(
+        -Wall
+        -Wextra
+        -Werror
+         $<$<BOOL:${SANITIZE}>:-fsanitize=address,undefined>
+    )
+    add_link_options(
+         $<$<BOOL:${SANITIZE}>:-fsanitize=address,undefined>
+    )
 endif()
     
+add_executable(LFU LFU.cpp)
+add_executable(Belady Belady.cpp)
 
-include_directories(${CMAKE_SOURCE_DIR}/inc)
+target_include_directories(LFU PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/inc)
+target_include_directories(Belady PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/inc)
 
-add_subdirectory(tests)
-
-add_executable(LFU
-   LFU.cpp
-)
-
-add_executable(Belady
-    Belady.cpp
-)
+if (BUILD_TESTS)
+    add_subdirectory(tests)
+endif()

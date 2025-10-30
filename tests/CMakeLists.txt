@@ -1,23 +1,12 @@
-cmake_minimum_required(VERSION 3.10)
-project(tests LANGUAGES CXX)
+enable_testing()
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+find_package(GTest REQUIRED)
+include(GoogleTest)
 
-set(SOURCES
-   Test.cpp
-)
+add_executable(UnitTesting Test.cpp)
 
-include_directories(${CMAKE_SOURCE_DIR}/inc)
-include_directories(${CMAKE_SOURCE_DIR}/tests/inc)
+target_include_directories(UnitTesting PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../inc)
+target_include_directories(UnitTesting PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/inc)
+target_link_libraries(UnitTesting  PRIVATE GTest::gtest_main)
 
-add_executable(${PROJECT_NAME} ${SOURCES})
-
-
-target_link_libraries (${PROJECT_NAME} PUBLIC
-   gtest
-   gtest_main
-)
-
-target_compile_options(tests PRIVATE -fsanitize=address -fno-omit-frame-pointer)
-target_link_options(tests PRIVATE -fsanitize=address)
+gtest_discover_tests(UnitTesting)
