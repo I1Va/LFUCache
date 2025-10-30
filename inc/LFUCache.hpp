@@ -50,7 +50,7 @@ class LFUCache {
   private:
     const KeyT *getKeyPtr(const KeyT &key) {
         auto [it, _] = keyStorage_.insert(key);
-        return &*it;
+        return std::addressof(*it);
     }
 
     bool full() const { return (size_ == capacity_); }

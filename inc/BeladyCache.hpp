@@ -17,15 +17,15 @@ using QueryIteration = int;
 constexpr inline QueryIteration MAX_QUERY_ITERATION =
     std::numeric_limits<QueryIteration>::max();
 
-template <typename T, typename KeyT, typename Hash = std::hash<KeyT>,
+template <typename DataT, typename KeyT, typename Hash = std::hash<KeyT>,
           typename Eq = std::equal_to<KeyT>>
 class BeladyCache {
-    using ListIt = typename std::list<T>::iterator;
+    using ListIt = typename std::list<DataT>::iterator;
 
     std::unordered_set<KeyT, Hash, Eq> keyStorage_;
 
     size_t capacity_ = 0;
-    std::list<T> cache_;
+    std::list<DataT> cache_;
 
     std::unordered_map<const KeyT *, ListIt> hashTable_;
     std::unordered_map<const KeyT *, std::queue<QueryIteration>>
