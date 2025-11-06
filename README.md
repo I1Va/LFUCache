@@ -33,12 +33,9 @@ cmake --build build
 ---
 
 ## Тестирование
-Тесты находятся в папке tests/Test.cpp
-
-
 Запуск всех тестов
 ```bash
-./build/tests/tests
+cd ./build/tests && ctest
 ```
 
 ---
